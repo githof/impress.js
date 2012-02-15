@@ -146,18 +146,24 @@
         scale:     1
     };
 
-    steps.forEach(function ( el, idx ) {
+      // I agonized over whether 'data-delta-x' was better than 'data-dx' and finally settled on the latter
+      // because it was shorter and had precedence in math and computer graphics
+      // This decision, however has some implications for the 'data-rotate/data-rotate-z' pair. See below.
+      steps.forEach(function ( el, idx ) {
         var data = el.dataset,
+            prev = idx > 0 ? steps[idx-1].stepData : undefined,
             step = {
                 translate: {
-                    x: data.x || 0,
-                    y: data.y || 0,
-                    z: data.z || 0
+                    x: (data.dx && idx > 0 ) ? parseInt(prev.translate.x,10) + parseInt(data.dx,10) : (data.x || 0),
+                    y: (data.dy && idx > 0 ) ? parseInt(prev.translate.y,10) + parseInt(data.dy,10) : (data.y || 0),
+                    z: (data.dz && idx > 0 ) ? parseInt(prev.translate.z,10) + parseInt(data.dz,10) : (data.z || 0)
                 },
                 rotate: {
-                    x: data.rotateX || 0,
-                    y: data.rotateY || 0,
-                    z: data.rotateZ || data.rotate || 0
+                    x: ( data.rotateDx && idx > 0 ) ? parseInt(prev.rotate.x,10) + parseInt(data.rotateDx,10) : (data.rotateX || 0),
+                    y: ( data.rotateDy && idx > 0 ) ? parseInt(prev.rotate.y,10) + parseInt(data.rotateDy,10) : (data.rotateY || 0),
+                    // There is no 'data-rotate-d' because it seems incomplete. So for relative coords you *have* to use 'data-rotate-dz'
+                    // The syntax I *did not* choose allows for a clean (but verbose) z-axis rotation alias: 'data-delta-rotate'
+                    z: ( data.rotateDz && idx > 0 ) ? parseInt(prev.rotate.z,10) + parseInt(data.rotateDz,10) : (data.rotateZ || data.rotate || 0)
                 },
                 scale: data.scale || 1
             };
